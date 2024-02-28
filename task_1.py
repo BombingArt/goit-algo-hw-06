@@ -12,17 +12,19 @@ class Name(Field):
         super().__init__(name)
 
     def __str__(self):
-        return (f"Name: {self.value}")
+        return f"Name: {self.value}"
 
-class Phone(Field):
+class Phone:
     def __init__(self, phone):
-        super().__init__(phone)
-        if len(self.phone) != 10:
-            print("Phone number must include 10 digits")
-    
-    def __str__(self):
-        return(f"Phone: {self.value}")
+        self.phone = self.validate_phone(phone)
 
+    def validate_phone(self, phone):
+        if not phone.isdigit() or len(phone) != 10:
+            raise ValueError("Номер має складатись з 10 цифр")
+        return phone
+
+    def __str__(self):
+        return f"Phone: {self.phone}"
 
 class Record:
     def __init__(self, name):
@@ -36,25 +38,31 @@ class Record:
         self.phones = [p for p in self.phones if p.value != phone]
 
     def edit_phone(self, old_phone, new_phone):
+        phone_found = False
         for p in self.phones:
-            if p.value == old_phone:
-                p.value = new_phone
-    
-    def find_phone(self, phone):
-        for p in self.phones:
-            if p.value == phone:
-                return p
+            if p.phone == old_phone:
+                if not new_phone.isdigit() or len(new_phone) != 10:
+                    raise ValueError("Новий номер має складатись з 10 цифр")
+                p.phone = new_phone
+                phone_found = True
+                break
+        if not phone_found:
+            raise ValueError("Номер не знайдено в записі")
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.phone for p in self.phones)}"
 
-class AdressBook(UserDict):
+class AddressBook(UserDict):
     def add_record(self, record):
+        if record.name.value in self.data:
+            raise ValueError("Запис з таким ім'ям вже існує")
         self.data[record.name.value] = record
-    
+
     def find(self, name):
         return self.data.get(name)
-    
+
     def delete(self, name):
         if name in self.data:
             return self.data.pop(name)
+        else:
+            raise ValueError("Запис з таким ім'ям не знайдено")
