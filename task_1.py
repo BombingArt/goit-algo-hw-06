@@ -42,7 +42,7 @@ class Record:
         for p in self.phones:
             if p.value == old_phone:
                 found = True
-                if Phone.validate_phone(new_phone):
+                if p.validate_phone(new_phone):
                     p.value = new_phone
                 else:
                     raise ValueError("Новий номер телефону невалідний")
